@@ -15,16 +15,27 @@ class SecondStageEvaluator:
          Y >= 0
     """
 
-    def __init__(self, q: np.ndarray, W: np.ndarray):
+    def __init__(
+        self,
+        q: np.ndarray,
+        W: np.ndarray,
+        vtypes: list[str] | None = None,
+    ):
         """
         Initialize the evaluator with deterministic second-stage parameters.
 
         Args:
             q: Second-stage cost vector.
             W: Recourse matrix.
+            vtypes: Optional list of Gurobi variable types (e.g., GRB.CONTINUOUS,
+                    GRB.BINARY).
+                    Defaults to GRB.CONTINUOUS for all variables.
         """
         self.q = q
         self.W = W
+        self.num_y = len(self.q)
+        self.vtypes = vtypes if vtypes is not None else [GRB.CONTINUOUS] * self.num_y
+
         self.env = gp.Env(empty=True)
         self.env.setParam("OutputFlag", 0)  # Suppress Gurobi output for bulk evaluation
         self.env.start()
@@ -42,17 +53,19 @@ class SecondStageEvaluator:
             float: Optimal second-stage cost (or infinity if infeasible).
         """
         model = gp.Model("second_stage", env=self.env)
-        num_y = len(self.q)
 
-        # Define continuous recourse variables Y >= 0
-        Y = model.addMVar(num_y, vtype=GRB.CONTINUOUS, lb=0.0, name="Y")
+        # Define recourse variables Y >= 0 with specified types
+        Y = []
+        for i in range(self.num_y):
+            Y.append(model.addVar(lb=0.0, vtype=self.vtypes[i], name=f"Y_{i}"))
+        Y_mvar = gp.MVar(Y)  # type: ignore[call-arg]
 
         # Add constraints: W Y <= h(xi) - T(xi) X
         rhs = h_xi - T_xi @ X
-        model.addConstr(self.W @ Y <= rhs, name="recourse_constr")
+        model.addConstr(self.W @ Y_mvar <= rhs, name="recourse_constr")
 
         # Set Objective: Minimize q^T Y
-        model.setObjective(self.q @ Y, GRB.MINIMIZE)
+        model.setObjective(self.q @ Y_mvar, GRB.MINIMIZE)
 
         model.optimize()
 
