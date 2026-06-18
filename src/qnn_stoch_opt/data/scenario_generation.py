@@ -1,3 +1,5 @@
+import typing
+
 import numpy as np
 import scipy.stats as stats
 
@@ -18,7 +20,10 @@ def generate_normal_scenarios(
         np.ndarray: Sampled scenarios of shape (num_scenarios, len(mean)).
     """
     np.random.seed(seed)
-    return stats.multivariate_normal.rvs(mean=mean, cov=cov, size=num_scenarios)
+    return typing.cast(
+        np.ndarray,
+        stats.multivariate_normal.rvs(mean=mean, cov=cov, size=num_scenarios),
+    )
 
 
 def generate_uniform_scenarios(
@@ -37,4 +42,7 @@ def generate_uniform_scenarios(
         np.ndarray: Sampled scenarios of shape (num_scenarios, len(low)).
     """
     np.random.seed(seed)
-    return stats.uniform.rvs(loc=low, scale=high - low, size=(num_scenarios, len(low)))
+    return typing.cast(
+        np.ndarray,
+        stats.uniform.rvs(loc=low, scale=high - low, size=(num_scenarios, len(low))),
+    )
