@@ -1,4 +1,5 @@
 import numpy as np
+
 from qnn_stoch_opt.data.saa_solver import SecondStageEvaluator
 
 

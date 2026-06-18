@@ -1,4 +1,5 @@
 import numpy as np
+
 from qnn_stoch_opt.data.scenario_generation import (
     generate_normal_scenarios,
     generate_uniform_scenarios,
