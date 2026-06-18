@@ -4,6 +4,17 @@ QNN-for-Stochastic-Optimization package.
 Top-level convenience re-exports from each subpackage.
 """
 
+from pathlib import Path
+
+try:
+    from dotenv import load_dotenv
+
+    _env_path = Path(__file__).parent.parent.parent / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path)
+except ImportError:
+    pass
+
 from qnn_stoch_opt.data.dataset import StochasticOptimizationDataset, create_dataloaders
 from qnn_stoch_opt.data.saa_solver import SecondStageEvaluator
 from qnn_stoch_opt.data.scenario_generation import (
