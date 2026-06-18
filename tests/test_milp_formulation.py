@@ -280,11 +280,12 @@ class TestEmbedQNNEndToEnd:
         optimizer.embed_surrogate(qnn, model_type="qnn")
         optimizer.set_risk_neutral_objective(c=[1.0, 1.0])
 
-        x_opt, obj_val = optimizer.optimize()
+        result = optimizer.optimize()
 
-        assert len(x_opt) == 2
-        assert all(-1.0 <= xi <= 1.0 + 1e-6 for xi in x_opt)
-        assert isinstance(obj_val, float)
+        assert result.is_optimal
+        assert len(result.x_opt) == 2
+        assert all(-1.0 <= xi <= 1.0 + 1e-6 for xi in result.x_opt)
+        assert isinstance(result.obj_val, float)
 
     def test_iqnn_milp_returns_feasible_solution(self) -> None:
         """MILP embedding of an IQNN returns an optimal solution without error."""
@@ -294,10 +295,11 @@ class TestEmbedQNNEndToEnd:
         optimizer.embed_surrogate(iqnn, model_type="iqnn")
         optimizer.set_risk_neutral_objective(c=[0.0, 0.0])
 
-        x_opt, obj_val = optimizer.optimize()
+        result = optimizer.optimize()
 
-        assert len(x_opt) == 2
-        assert isinstance(obj_val, float)
+        assert result.is_optimal
+        assert len(result.x_opt) == 2
+        assert isinstance(result.obj_val, float)
 
     def test_qnn_milp_solution_consistent_with_forward_pass(self) -> None:
         """
@@ -309,16 +311,18 @@ class TestEmbedQNNEndToEnd:
         optimizer = SurrogateOptimizer(x_dim=2, x_bounds=x_bounds)
         optimizer.embed_surrogate(qnn, model_type="qnn")
         optimizer.set_risk_neutral_objective(c=[0.0, 0.0])
-        x_opt, milp_obj = optimizer.optimize()
+        result = optimizer.optimize()
 
+        assert result.is_optimal
+        assert result.obj_val is not None
         # Compute expected value via forward pass
-        x_tensor = torch.tensor(x_opt, dtype=torch.float32).unsqueeze(0)
+        x_tensor = torch.tensor(result.x_opt, dtype=torch.float32).unsqueeze(0)
         with torch.no_grad():
             q_preds = qnn(x_tensor).numpy().flatten()
         nn_expected = float(np.mean(q_preds))
 
-        assert abs(milp_obj - nn_expected) < 1e-4, (
-            f"MILP objective {milp_obj} does not match NN forward {nn_expected}"
+        assert abs(result.obj_val - nn_expected) < 1e-4, (
+            f"MILP objective {result.obj_val} does not match NN forward {nn_expected}"
         )
 
     def test_iqnn_quantile_monotonicity_at_optimum(self) -> None:
@@ -331,9 +335,10 @@ class TestEmbedQNNEndToEnd:
         optimizer = SurrogateOptimizer(x_dim=2, x_bounds=x_bounds)
         optimizer.embed_surrogate(iqnn, model_type="iqnn")
         optimizer.set_risk_neutral_objective(c=[0.0, 0.0])
-        optimizer.optimize()
+        result = optimizer.optimize()
 
-        q_vals = [v.X for v in optimizer.quantiles_vars]
+        assert result.is_optimal
+        q_vals = result.quantile_vals
         for i in range(len(q_vals) - 1):
             assert q_vals[i] <= q_vals[i + 1] + 1e-6, (
                 f"Quantile monotonicity violated: "
@@ -363,28 +368,32 @@ class TestSurrogateOptimizerObjectives:
     def test_risk_neutral_objective_is_set(self) -> None:
         opt = self._make_optimizer()
         opt.set_risk_neutral_objective(c=[1.0])
-        x_opt, obj = opt.optimize()
-        assert len(x_opt) == 1
-        assert isinstance(obj, float)
+        result = opt.optimize()
+        assert result.is_optimal
+        assert len(result.x_opt) == 1
+        assert isinstance(result.obj_val, float)
 
     def test_risk_averse_objective_alpha_0(self) -> None:
         """Alpha=0 means tail covers all quantiles — same as risk-neutral mean."""
         opt = self._make_optimizer()
         opt.set_risk_averse_objective(c=[0.0], alpha=0.0)
-        _, obj_cvar = opt.optimize()
+        result_cvar = opt.optimize()
 
         opt2 = self._make_optimizer()
         opt2.set_risk_neutral_objective(c=[0.0])
-        _, obj_neutral = opt2.optimize()
+        result_neutral = opt2.optimize()
 
-        assert abs(obj_cvar - obj_neutral) < 1e-6
+        assert (
+            abs((result_cvar.obj_val or 0.0) - (result_neutral.obj_val or 0.0)) < 1e-6
+        )
 
     def test_risk_averse_objective_high_alpha(self) -> None:
         """Alpha=0.9 focuses on the top 10% quantiles."""
         opt = self._make_optimizer()
         opt.set_risk_averse_objective(c=[0.0], alpha=0.9)
-        _, obj = opt.optimize()
-        assert isinstance(obj, float)
+        result = opt.optimize()
+        assert result.is_optimal
+        assert isinstance(result.obj_val, float)
 
     def test_risk_averse_raises_on_alpha_too_high(self) -> None:
         """Alpha=1.0 leaves no quantiles in tail — should raise ValueError."""
@@ -396,13 +405,13 @@ class TestSurrogateOptimizerObjectives:
         """lam=0 in mean-risk reduces to risk-neutral."""
         opt = self._make_optimizer()
         opt.set_mean_risk_objective(c=[0.0], alpha=0.8, lam=0.0)
-        _, obj_mr = opt.optimize()
+        result_mr = opt.optimize()
 
         opt2 = self._make_optimizer()
         opt2.set_risk_neutral_objective(c=[0.0])
-        _, obj_neutral = opt2.optimize()
+        result_neutral = opt2.optimize()
 
-        assert abs(obj_mr - obj_neutral) < 1e-6
+        assert abs((result_mr.obj_val or 0.0) - (result_neutral.obj_val or 0.0)) < 1e-6
 
     def test_mean_risk_objective_varies_with_lam(self) -> None:
         """
@@ -414,19 +423,21 @@ class TestSurrogateOptimizerObjectives:
         # lam=0 must equal risk-neutral
         opt_neutral = self._make_optimizer()
         opt_neutral.set_risk_neutral_objective(c=[0.0])
-        _, obj_neutral = opt_neutral.optimize()
+        result_neutral = opt_neutral.optimize()
 
         opt_mr_zero = self._make_optimizer()
         opt_mr_zero.set_mean_risk_objective(c=[0.0], alpha=0.5, lam=0.0)
-        _, obj_mr_zero = opt_mr_zero.optimize()
+        result_mr_zero = opt_mr_zero.optimize()
 
-        assert abs(obj_mr_zero - obj_neutral) < 1e-6
+        mr_zero_val = result_mr_zero.obj_val or 0.0
+        neutral_val = result_neutral.obj_val or 0.0
+        assert abs(mr_zero_val - neutral_val) < 1e-6
 
         # Non-zero lam should still produce a valid float
         opt_mr = self._make_optimizer()
         opt_mr.set_mean_risk_objective(c=[0.0], alpha=0.5, lam=5.0)
-        _, obj_mr = opt_mr.optimize()
-        assert isinstance(obj_mr, float)
+        result_mr = opt_mr.optimize()
+        assert isinstance(result_mr.obj_val, float)
 
     def test_mean_risk_raises_on_negative_lam(self) -> None:
         opt = self._make_optimizer()

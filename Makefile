@@ -10,6 +10,7 @@ PIP           ?= pip3
 .PHONY: help
 help:
 	@printf "QNN Framework for Stochastic Optimization — available targets\n\n"
+	@printf "  install           Install project package\n"
 	@printf "  format            Format with Ruff\n"
 	@printf "  check             Run all linters, typechecks, and tests across the system\n"
 	@printf "  test              Run tests with pytest\n"
@@ -18,7 +19,10 @@ help:
 # ──────────────────────────────────────────────────────────────────────────────
 # Top-level targets
 # ──────────────────────────────────────────────────────────────────────────────
-.PHONY: format check test lint
+.PHONY: install format check test lint
+
+install:
+	PIP install .
 
 format:
 	ruff format src tests

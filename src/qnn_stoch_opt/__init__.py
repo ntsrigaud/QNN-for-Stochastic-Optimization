@@ -15,7 +15,12 @@ from qnn_stoch_opt.models.loss import pinball_loss
 from qnn_stoch_opt.models.qnn import QuantileNeuralNetwork
 from qnn_stoch_opt.models.trainer import train_model
 from qnn_stoch_opt.optimization.milp_formulation import QNNtoMILP
-from qnn_stoch_opt.optimization.stochastic_optimizer import SurrogateOptimizer
+from qnn_stoch_opt.optimization.stochastic_optimizer import (
+    ConstrSense,
+    SolveResult,
+    SurrogateOptimizer,
+    VarType,
+)
 
 __all__ = [
     # data
@@ -32,4 +37,7 @@ __all__ = [
     # optimization
     "QNNtoMILP",
     "SurrogateOptimizer",
+    "VarType",
+    "ConstrSense",
+    "SolveResult",
 ]
