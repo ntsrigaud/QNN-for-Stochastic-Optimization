@@ -10,7 +10,7 @@ authors = [
     {name = "Antonio Alcántara, Carlos Ruiz, Calvin Tsay"}
 ]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
     "torch>=2.0.0",
     "gurobipy>=10.0.0",
@@ -34,12 +34,12 @@ where = ["src"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 strict = true
 ignore_missing_imports = true
