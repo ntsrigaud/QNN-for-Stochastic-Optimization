@@ -152,6 +152,9 @@ class QNNtoMILP:
         """
         Embeds a standard QuantileNeuralNetwork.
         """
+        assert isinstance(qnn.network, nn.Sequential), (
+            f"Expected qnn.network to be nn.Sequential, got {type(qnn.network)}"
+        )
         out_vars, _ = self.embed_sequential(qnn.network, x_vars, x_bounds)
         return out_vars
 
@@ -162,9 +165,16 @@ class QNNtoMILP:
         Embeds an IncrementalQuantileNeuralNetwork, accounting for the final
         ReLU increment and cumulative sum mechanism.
         """
+        assert isinstance(
+            iqnn.hidden_layers, nn.Sequential
+        ), f"""Expected iqnn.hidden_layers to be nn.Sequential, 
+                got {type(iqnn.hidden_layers)}"""
         h_vars, h_bounds = self.embed_sequential(iqnn.hidden_layers, x_vars, x_bounds)
 
         # Process output layer (Linear)
+        assert isinstance(iqnn.output_layer, nn.Linear), (
+            f"Expected iqnn.output_layer to be nn.Linear, got {type(iqnn.output_layer)}"
+        )
         W = iqnn.output_layer.weight.detach().numpy()
         b = iqnn.output_layer.bias.detach().numpy()
         num_out = W.shape[0]
