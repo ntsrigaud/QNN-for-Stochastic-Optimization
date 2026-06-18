@@ -1,0 +1,19 @@
+name: qnn
+channels:
+  - pytorch
+  - gurobi
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.9
+  - pytorch
+  - gurobi
+  - numpy
+  - pandas
+  - scipy
+  - matplotlib
+  - seaborn
+  - pytest
+  - pip
+  - pip:
+    - -e .[dev]
