@@ -17,7 +17,7 @@ Stage 2 (after observing demand wave 2): assignment decisions only.
 
 from __future__ import annotations
 
-from typing import Tuple
+from typing import Tuple, cast
 
 import gurobipy as gp
 import numpy as np
@@ -92,7 +92,7 @@ class ThreeStageCFLPEvaluator:
 
     def _effective_capacity(self, x_0: np.ndarray, x_1: np.ndarray) -> np.ndarray:
         capacity_gain = self.expanded_capacities - self.base_capacities
-        return x_0 * (self.base_capacities + x_1 * capacity_gain)
+        return cast(np.ndarray, x_0 * (self.base_capacities + x_1 * capacity_gain))
 
     def _solve_assignment(
         self, x_0: np.ndarray, demand: np.ndarray, capacity: np.ndarray
