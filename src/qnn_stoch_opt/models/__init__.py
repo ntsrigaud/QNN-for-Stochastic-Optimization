@@ -8,8 +8,11 @@ Exports:
         quantile crossing by predicting non-negative increments via a ReLU output.
     pinball_loss: Vectorised quantile (pinball) loss for training QNN/IQNN models.
     train_model: Training loop with early stopping for QNN/IQNN models.
+    CascadeQNN: Cascade of QNN/IQNN surrogates for multi-stage stochastic
+        optimization, trained by backward induction.
 """
 
+from qnn_stoch_opt.models.cascade import CascadeQNN
 from qnn_stoch_opt.models.iqnn import IncrementalQuantileNeuralNetwork
 from qnn_stoch_opt.models.loss import pinball_loss
 from qnn_stoch_opt.models.qnn import QuantileNeuralNetwork
@@ -20,4 +23,5 @@ __all__ = [
     "IncrementalQuantileNeuralNetwork",
     "pinball_loss",
     "train_model",
+    "CascadeQNN",
 ]

@@ -13,7 +13,10 @@ dependencies:
   - scipy
   - matplotlib
   - seaborn
+  - python-dotenv
+  - nbconvert
   - pytest
   - pip
   - pip:
+    - nbconvert[webpdf]
     - -e .[dev]

@@ -2,7 +2,7 @@
   "config": {
     "n_facilities": 10,
     "n_customers": 10,
-    "num_train": 10000,
+    "num_train": 20000,
     "hidden_dims": [
       64,
       64
@@ -13,40 +13,40 @@
     "lambda_risk": 1.0
   },
   "training": {
-    "qnn_val_loss": 16.835402119544245,
-    "iqnn_val_loss": 17.02656401357343,
-    "qnn_train_time_s": 5.936753749847412,
-    "iqnn_train_time_s": 5.949941873550415
+    "qnn_val_loss": 17.514563452812933,
+    "iqnn_val_loss": 12.230168127244518,
+    "qnn_train_time_s": 28.183491945266724,
+    "iqnn_train_time_s": 30.88697624206543
   },
   "crossing_analysis": {
-    "qnn_mean_crossings": 11.501515151515152,
+    "qnn_mean_crossings": 10.088086824835942,
     "iqnn_mean_crossings": 0.0
   },
   "risk_neutral": {
     "qnn": {
       "true_obj": Infinity,
-      "solve_time": 0.0009639263153076172,
+      "solve_time": 0.0028982162475585938,
       "mip_gap": 0.0
     },
     "iqnn": {
-      "true_obj": Infinity,
-      "solve_time": 0.21021699905395508,
-      "mip_gap": 7.472249856146462e-05
+      "true_obj": 686.6134083468683,
+      "solve_time": 0.4053776264190674,
+      "mip_gap": 0.0
     },
     "saa": {
       "true_obj": 494.551223056822,
-      "solve_time": 0.29022693634033203,
+      "solve_time": 0.45550537109375,
       "n_scenarios": 50
     }
   },
   "risk_averse": {
     "qnn": {
       "true_obj": Infinity,
-      "solve_time": 0.0008630752563476562
+      "solve_time": 0.0011854171752929688
     },
     "iqnn": {
-      "true_obj": Infinity,
-      "solve_time": 0.26370906829833984
+      "true_obj": 934.2473343606588,
+      "solve_time": 0.4769103527069092
     }
   }
 }
