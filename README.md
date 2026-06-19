@@ -1,6 +1,5 @@
 # QNN for Stochastic Optimization
 
-[![Tests & Linting](https://github.com/ntsrigaud/QNN-for-Stochastic-Optimization/actions/workflows/ci.yml/badge.svg)](https://github.com/ntsrigaud/QNN-for-Stochastic-Optimization/actions)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-yellow.svg)](LICENSE)
 
