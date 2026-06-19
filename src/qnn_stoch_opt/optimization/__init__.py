@@ -17,6 +17,10 @@ Exports:
 """
 
 from qnn_stoch_opt.optimization.milp_formulation import QNNtoMILP
+from qnn_stoch_opt.optimization.multistage_optimizer import (
+    MultiStageSolveResult,
+    MultiStageSurrogateOptimizer,
+)
 from qnn_stoch_opt.optimization.stochastic_optimizer import (
     ConstrSense,
     SolveResult,
@@ -30,4 +34,6 @@ __all__ = [
     "VarType",
     "ConstrSense",
     "SolveResult",
+    "MultiStageSurrogateOptimizer",
+    "MultiStageSolveResult",
 ]
